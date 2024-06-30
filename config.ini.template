@@ -10,5 +10,8 @@ directory_path=
 directory_name=
 # In seconds: 5 (for 5 seconds), 60 (for 1 minute)
 period_time=
+
+# Optional
+
 # Example: file.txt, example.py, .gitignore (", " is separator)
 ignore_files=
