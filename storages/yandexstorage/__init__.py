@@ -54,8 +54,10 @@ class YandexStorage(BaseStorage):
 
         self.ignore_files = ignore_files or []
 
-        self.logger.info("Программа синхронизации файлов "
-                         f"с директорией {self.directory_path} началась")
+        self.logger.info(
+            "Программа синхронизации файлов "
+            f"с директорией {self.directory_path} началась"
+        )
 
     def get_or_create_dir(self):
         response = self.__session.get(
@@ -73,7 +75,7 @@ class YandexStorage(BaseStorage):
     def load(self, filename: str):
         response = self.__session.get(
             self.__url + f"/upload?path={self.__directory}/{filename}&"
-                         "overwrite=false",
+            "overwrite=false",
             headers=self.__headers,
         ).json()
         with open(self.directory_path + f"/{filename}") as file:
@@ -84,7 +86,7 @@ class YandexStorage(BaseStorage):
     def reload(self, filename: str):
         response = self.__session.get(
             self.__url + f"/upload?path={self.__directory}/{filename}&"
-                         "overwrite=true",
+            "overwrite=true",
             headers=self.__headers,
         ).json()
         with open(self.directory_path + f"/{filename}") as file:
@@ -94,8 +96,7 @@ class YandexStorage(BaseStorage):
 
     def delete(self, filename: str):
         self.__session.delete(
-            self.__url + f"?path={self.__directory}/{filename}",
-            headers=self.__headers
+            self.__url + f"?path={self.__directory}/{filename}", headers=self.__headers
         )
         self.logger.info(f"Файл {filename} успешно удалён.")
 
@@ -106,9 +107,7 @@ class YandexStorage(BaseStorage):
         files_list = response["_embedded"]["items"]
         files = dict()
         for index, file in enumerate(files_list):
-            files[file["name"]] = self.__session.get(
-                file["file"]
-            ).content.decode()
+            files[file["name"]] = self.__session.get(file["file"]).content.decode()
         return files
 
     def work(self):
@@ -121,17 +120,13 @@ class YandexStorage(BaseStorage):
                 ):
                     continue
                 try:
-                    with (open(self.directory_path + "/" + file, "r")
-                          as open_file):
+                    with open(self.directory_path + "/" + file, "r") as open_file:
                         read_file = open_file.read()
                         if read_file == files.get(file):
-                            self.logger.info(
-                                f"Файл {file} остался без изменений"
-                            )
+                            self.logger.info(f"Файл {file} остался без изменений")
                             files.pop(file)
-                        elif (
-                                files.get(file) is not None and
-                                read_file != files.get(file)
+                        elif files.get(file) is not None and read_file != files.get(
+                            file
                         ):
                             self.reload(file)
                             files.pop(file)
@@ -140,15 +135,15 @@ class YandexStorage(BaseStorage):
                 except PermissionError:
                     self.logger.error(f"Отказ в доступе к файлу {file}")
                 except requests.exceptions.ConnectionError:
-                    self.logger.error("Ошибка соединения при "
-                                      f"работе с файлом {file}")
+                    self.logger.error(
+                        "Ошибка соединения при " f"работе с файлом {file}"
+                    )
             for file in files:
                 try:
                     self.delete(file)
                 except requests.exceptions.ConnectionError:
                     self.logger.error(
-                        "Ошибка соединения при удалении "
-                        f"файла {file} из облака"
+                        "Ошибка соединения при удалении " f"файла {file} из облака"
                     )
         except requests.exceptions.ConnectionError:
             self.logger.error(
